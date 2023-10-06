@@ -54,7 +54,22 @@ bool solved;
  * @param postfixExpressionLength Ukazatel na aktuální délku výsledného postfixového výrazu
  */
 void untilLeftPar( Stack *stack, char *postfixExpression, unsigned *postfixExpressionLength ) {
-	solved = false; /* V případě řešení, smažte tento řádek! */
+	// Variable for storing the top of the stack.
+	char popStackTop;
+	// While the stack is not empty, save the top of the stack to popStackTop and pop it.
+	while ( !stackEmpty( stack ) ) {
+		Stack_Top( stack, &popStackTop );
+		Stack_Pop( stack );
+		// If the top of the stack is a left parenthesis, break the loop.
+		if ( popStackTop == '(' ) {
+			// Don't save the left parenthesis to the postfix expression.
+			break;
+		}
+		// Save the poped top of the stack to the actual position in the postfix expression.
+		postfixExpression[*postfixExpressionLength] = popStackTop;
+		// Increment the actual position in the postfix expression.
+		(*postfixExpressionLength)++
+	}
 }
 
 /**
