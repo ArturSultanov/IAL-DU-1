@@ -77,7 +77,7 @@ void Stack_Init( Stack *stack ) {
         Stack_Error(SERR_INIT);
         return;
     }
-	stack->topIndex = 0;
+	stack->topIndex = -1;
 }
 
 /**
@@ -90,7 +90,7 @@ void Stack_Init( Stack *stack ) {
  * @returns true v případě, že je zásobník prázdný, jinak false
  */
 bool Stack_IsEmpty( const Stack *stack ) {
-	return stack->topIndex == 0;
+	return stack->topIndex == -1;
 }
 
 /**
@@ -106,7 +106,7 @@ bool Stack_IsEmpty( const Stack *stack ) {
  * @returns true v případě, že je zásobník plný, jinak false
  */
 bool Stack_IsFull( const Stack *stack ) {
-	return stack->topIndex == STACK_SIZE;
+	return stack->topIndex == STACK_SIZE - 1;
 }
 
 /**
@@ -126,7 +126,7 @@ void Stack_Top( const Stack *stack, char *dataPtr ) {
 		Stack_Error(SERR_TOP);
 		return;
 	}
-	*dataPtr = stack->array[stack->topIndex - 1];
+	*dataPtr = stack->array[stack->topIndex];
 }
 
 
@@ -164,8 +164,8 @@ void Stack_Push( Stack *stack, char data ) {
 		Stack_Error(SERR_PUSH);
 		return;
 	}else{
-		stack->array[stack->topIndex] = data;
 		stack->topIndex++;
+		stack->array[stack->topIndex] = data;
 	}
 }
 
@@ -178,8 +178,7 @@ void Stack_Push( Stack *stack, char data ) {
  */
 void Stack_Dispose( Stack *stack ) {
 	free(stack->array);
-	stack->array = NULL;
-	stack->topIndex = 0;
+	stack->topIndex = -1;
 }
 
 /* Konec c202.c */
