@@ -178,6 +178,7 @@ void Stack_Push( Stack *stack, char data ) {
  */
 void Stack_Dispose( Stack *stack ) {
 	free(stack->array);
+	stack->array = NULL;
 	stack->topIndex = -1;
 }
 
