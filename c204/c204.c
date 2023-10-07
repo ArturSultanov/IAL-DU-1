@@ -97,26 +97,28 @@ void doOperation( Stack *stack, char c, char *postfixExpression, unsigned *postf
 	}
 
 	char stackTop;
-	Stack_Top( stack, &stackTop );
-	// If the stack top is a left parenthesis, push the operator to the stack.
-	if ((stackTop == '+' || stackTop == '-') && ( c == '*' || c == '/')) {
-		// If the stack top is a math operator with lower priority, push the operator to the stack.
-		// a + b * c = a b c * + = a (b c *) +
-		Stack_Push(stack, c);
-		return;
-	} else if (stackTop == '(') {
+	while (true) {
+		Stack_Top( stack, &stackTop );
 		// If the stack top is a left parenthesis, push the operator to the stack.
-		Stack_Push(stack, c);
-		return;
-	} else {
-		// If the stack top is a math operator with higher priority, pop the stack top and do the operation again.
-		// a * b + c = a b * c + = ((a b *) c +)
+		if (stackTop == '(') {
+			Stack_Push(stack, c);
+			break;
+		}
+		// If the stack top is a math operator with lower priority, push the operator to the stack.
+		if ((stackTop == '+' || stackTop == '-') && ( c == '*' || c == '/')) {
+			Stack_Push(stack, c);
+			break;
+		}
+		// If the stack top is a math operator with higher or equal priority, pop the stack top.
 		postfixExpression[(*postfixExpressionLength)++] = stackTop;
 		Stack_Pop(stack);
-		doOperation(stack, c, postfixExpression, postfixExpressionLength);
+		if (Stack_IsEmpty(stack)) {
+			Stack_Push(stack, c);
+			break;
+		}
 	}
-
 }
+
 
 /**
  * Konverzní funkce infix2postfix.
@@ -391,4 +393,5 @@ bool eval( const char *infixExpression, VariableValue variableValues[], int vari
     return true;
 }
 
+// xsulta01 - Artur Sultanov
 /* Konec c204.c */
