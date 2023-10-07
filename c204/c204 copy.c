@@ -55,20 +55,20 @@ bool solved;
  */
 void untilLeftPar( Stack *stack, char *postfixExpression, unsigned *postfixExpressionLength ) {
 	// Variable for storing the top of the stack.
-	char stackTop;
-	// While the stack is not empty, save the top of the stack to stackTop and pop it.
+	char popStackTop;
+	// While the stack is not empty, save the top of the stack to popStackTop and pop it.
 	while ( !Stack_IsEmpty( stack ) ) {
-		Stack_Top( stack, &stackTop );
+		Stack_Top( stack, &popStackTop );
 		Stack_Pop( stack );
 		// If the top of the stack is a left parenthesis, break the loop.
-		if ( stackTop == '(' ) {
+		if ( popStackTop == '(' ) {
 			// Don't save the left parenthesis to the postfix expression.
 			break;
 		}
 		// Save the poped top of the stack to the actual position in the postfix expression.
-		postfixExpression[(*postfixExpressionLength)++] = stackTop;
+		postfixExpression[*postfixExpressionLength] = popStackTop;
 		// Increment the actual position in the postfix expression.
-		//(*postfixExpressionLength)++;
+		(*postfixExpressionLength)++;
 	}
 }
 
@@ -99,19 +99,17 @@ void doOperation( Stack *stack, char c, char *postfixExpression, unsigned *postf
 
 	if ( stackTop == '(' ) {
 		Stack_Push( stack, c );
-		return;
-	}
-	if ((stackTop == '+' || stackTop == '-') && ( c == '*' || c == '/' )) {
+		//return;
+	} else if ((stackTop == '+' || stackTop == '-') && ( c == '*' || c == '/' )) {
 		// a + b * c = a b c * + = a (b c *) +
 		Stack_Push( stack, c );
-		return;
-	}
-
-		postfixExpression[(*postfixExpressionLength)++] = stackTop;
-		//(*postfixExpressionLength)++;
+		//return;
+	} else {
+		postfixExpression[*postfixExpressionLength] = stackTop;
+		(*postfixExpressionLength)++;
 		Stack_Pop( stack );
-
 		doOperation( stack, c, postfixExpression, postfixExpressionLength );
+	}
 
 }
 
@@ -167,7 +165,6 @@ char *infix2postfix( const char *infixExpression ) {
 	// Allocation of memory for the output string.
 	char *postfixExpression = (char *) malloc( MAX_LEN * sizeof( char ) );
 	// If the allocation failed, return NULL.
-	
 	if ( !postfixExpression ) {
 		return NULL;
 	}
@@ -183,104 +180,50 @@ char *infix2postfix( const char *infixExpression ) {
 	Stack_Init( stack );
 	
 	char c = *infixExpression;
-	unsigned int postfixExpressionLength = 0;
-	while (c != '\0') {
-		if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
-			postfixExpression[postfixExpressionLength++] = c;
+	unsigned postfixExpressionLength = 0;
+
+	// Go through the input infix expression to parse the lexems.
+	while (c != '\0')
+	{
+		if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
+		{
+			postfixExpression[postfixExpressionLength] = c;
+			postfixExpressionLength++;
 		}
-		else if (c == '+' || c == '-' || c == '*' || c == '/') {
-			doOperation(stack, c, postfixExpression, &postfixExpressionLength);
-		} 
-		else if (c == '(') {
+		else if (c == '(')
+		{
 			Stack_Push(stack, c);
-		} 
-		else if (c == ')') {
+		}
+		else if (c == ')')
+		{
 			untilLeftPar(stack, postfixExpression, &postfixExpressionLength);
-		} 
-		else if (c == '=') {
-			while (!Stack_IsEmpty(stack)) {
-				Stack_Top(stack, &(postfixExpression[postfixExpressionLength++]));
-				Stack_Pop(stack);
-			}
-			postfixExpression[postfixExpressionLength++] = '=';
+		}
+		else if (c == '+' || c == '-' || c == '*' || c == '/')
+		{
+			doOperation(stack, c, postfixExpression, &postfixExpressionLength);
+		}
+		else if (c == '=')
+		{
+			untilLeftPar(stack, postfixExpression, &postfixExpressionLength);
+			postfixExpression[postfixExpressionLength] = c;
+			postfixExpressionLength++;
 			break;
 		}
-		infixExpression++;
-		c = *infixExpression;
+		else
+		{
+			// Invalid character.
+			free(postfixExpression);
+			free(stack);
+			return NULL;
+		}
+		
+		c++;
+		
 	}
-
-
-	// for ( char c = *infixExpression; c != '\0'; c = *(++infixExpression)){
-	// 	if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')){
-	// 		postfixExpression[postfixExpressionLength++] = c;
-	// 	}
-	// 	else if (c == '('){
-	// 		Stack_Push(stack, c);
-	// 	}
-	// 	else if (c == '+' || c == '-' || c == '*' || c == '/'){
-	// 		doOperation(stack, c, postfixExpression, &postfixExpressionLength);
-	// 	}
-	// 	else if (c == ')'){
-	// 		untilLeftPar(stack, postfixExpression, &postfixExpressionLength);
-	// 	}
-	// 	else if (c == '='){
-	// 		while (!Stack_IsEmpty(stack))
-	// 		{
-	// 			Stack_Top(stack, &(postfixExpression[postfixExpressionLength++]));
-	// 			Stack_Pop(stack);
-	// 		}
-	// 		postfixExpression[postfixExpressionLength++] = '=';
-	// 		break;
-	// 	}
-	// }
-
 	postfixExpression[postfixExpressionLength] = '\0';
+	postfixExpressionLength++;
 	free(stack);
-
 	return postfixExpression;
-
-	// // Go through the input infix expression to parse the lexems.
-	// while (c != '\0')
-	// {
-	// 	if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
-	// 	{
-	// 		postfixExpression[postfixExpressionLength] = c;
-	// 		postfixExpressionLength++;
-	// 	}
-	// 	else if (c == '(')
-	// 	{
-	// 		Stack_Push(stack, c);
-	// 	}
-	// 	else if (c == ')')
-	// 	{
-	// 		untilLeftPar(stack, postfixExpression, &postfixExpressionLength);
-	// 	}
-	// 	else if (c == '+' || c == '-' || c == '*' || c == '/')
-	// 	{
-	// 		doOperation(stack, c, postfixExpression, &postfixExpressionLength);
-	// 	}
-	// 	else if (c == '=')
-	// 	{
-	// 		untilLeftPar(stack, postfixExpression, &postfixExpressionLength);
-	// 		postfixExpression[postfixExpressionLength] = c;
-	// 		postfixExpressionLength++;
-	// 		break;
-	// 	}
-	// 	else
-	// 	{
-	// 		// Invalid character.
-	// 		free(postfixExpression);
-	// 		free(stack);
-	// 		return NULL;
-	// 	}
-		
-	// 	c++;
-		
-	// }
-	// postfixExpression[postfixExpressionLength] = '\0';
-	// postfixExpressionLength++;
-	// free(stack);
-	// return postfixExpression;
 	
 }
 
