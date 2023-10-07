@@ -228,7 +228,6 @@ char *infix2postfix( const char *infixExpression ) {
 	free(stack);
 
 	return postfixExpression;
-	
 }
 
 
