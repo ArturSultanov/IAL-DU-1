@@ -58,17 +58,18 @@ void untilLeftPar( Stack *stack, char *postfixExpression, unsigned *postfixExpre
 	char stackTop;
 
 	// While the stack is not empty, save the top of the stack to stackTop and pop it.
-	while ( !Stack_IsEmpty( stack ) ) {
-		Stack_Top( stack, &stackTop );
-		Stack_Pop( stack );
+	while (!Stack_IsEmpty(stack)) {
+		Stack_Top(stack, &stackTop);
+		Stack_Pop(stack);
 		// If the top of the stack is a left parenthesis, break the loop.
-		if ( stackTop == '(' ) {
+		if (stackTop == '(') {
 			// Don't save the left parenthesis to the postfix expression.
 			break;
 		}
 		// Save the poped top of the stack (math operator) to the actual position in the postfix exp.
 		// Increase the actual postion afrer saving the operator.
-		postfixExpression[(*postfixExpressionLength)++] = stackTop;
+		postfixExpression[*postfixExpressionLength] = stackTop;
+		(*postfixExpressionLength)++;
 	}
 }
 
@@ -98,21 +99,21 @@ void doOperation( Stack *stack, char c, char *postfixExpression, unsigned *postf
 	char stackTop;
 	Stack_Top( stack, &stackTop );
 	// If the stack top is a left parenthesis, push the operator to the stack.
-	if ((stackTop == '+' || stackTop == '-') && ( c == '*' || c == '/' )) {
+	if ((stackTop == '+' || stackTop == '-') && ( c == '*' || c == '/')) {
 		// If the stack top is a math operator with lower priority, push the operator to the stack.
 		// a + b * c = a b c * + = a (b c *) +
-		Stack_Push( stack, c );
+		Stack_Push(stack, c);
 		return;
-	} else if ( stackTop == '(' ) {
+	} else if (stackTop == '(') {
 		// If the stack top is a left parenthesis, push the operator to the stack.
-		Stack_Push( stack, c );
+		Stack_Push(stack, c);
 		return;
 	} else {
 		// If the stack top is a math operator with higher priority, pop the stack top and do the operation again.
 		// a * b + c = a b * c + = ((a b *) c +)
 		postfixExpression[(*postfixExpressionLength)++] = stackTop;
-		Stack_Pop( stack );
-		doOperation( stack, c, postfixExpression, postfixExpressionLength );
+		Stack_Pop(stack);
+		doOperation(stack, c, postfixExpression, postfixExpressionLength);
 	}
 
 }
@@ -167,22 +168,21 @@ void doOperation( Stack *stack, char c, char *postfixExpression, unsigned *postf
  */
 char *infix2postfix( const char *infixExpression ) {
 	// Allocation of memory for the output string.
-	char *postfixExpression = (char *) malloc( MAX_LEN * sizeof( char ) );
-
+	char *postfixExpression = (char *) malloc( MAX_LEN * sizeof(char));
 	// If the allocation failed, return NULL.
-	if ( !postfixExpression ) {
+	if (!postfixExpression) {
 		return NULL;
 	}
 
 	// Allocation of memory for the stack of the operators.
-	Stack *stack = (Stack *) malloc( sizeof( Stack ) );
+	Stack *stack = (Stack *) malloc(sizeof(Stack));
 	// If the allocation failed, return NULL.
-	if ( !stack ) {
+	if (!stack) {
 		free( postfixExpression );
 		return NULL;
 	}
 
-	Stack_Init( stack );
+	Stack_Init(stack);
 	
 	// Variable for storing the actual character from the infix expression.
 	char c = *infixExpression;
@@ -215,22 +215,20 @@ char *infix2postfix( const char *infixExpression ) {
 			}
 			// After adding all the operators, add the equal sign to the postfix expression.
 			postfixExpression[postfixExpressionLength++] = '=';
-			// Break the loop.
 			break;
 		}
 		// Move to the next character in the infix expression.
-		c = *(++infixExpression);
-		// infixExpression++;
-		// c = *infixExpression;
+		infixExpression++;
+		c = *infixExpression;
 	}
 
 	// Add the null terminator to the end of the postfix expression.
 	postfixExpression[postfixExpressionLength] = '\0';
 	free(stack);
+	Stack_Dispose(stack);
 
 	return postfixExpression;
 }
-
 
 /**
  * Pomocná metoda pro vložení celočíselné hodnoty na zásobník.
@@ -245,35 +243,16 @@ char *infix2postfix( const char *infixExpression ) {
  */
 
 void expr_value_push( Stack *stack, int value ) {
-    // Push the integer value onto the stack byte by byte
+	// value = xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx - 32-bit integer (4 bytes)
+ 	// Loop through the 4 bytes, from the most significant to the least significant
     for (int i = 0; i < 4; i++) {
+		// value >> (i * 8) - bit shift to the right by i * 8 bits
+		// 0xFF - 8-bit mask (00000000 00000000 00000000 11111111)
+ 		// Using bitwise AND to get the last 8 bits of the shifted value
         char byte = (value >> (i * 8)) & 0xFF;
         Stack_Push(stack, byte);
     }
 }
-// void expr_value_push( Stack *stack, int value ) {
-
-// 	// value = xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx - 32-bit integer (4 bytes)
-// 	// Loop through the 4 bytes, from the most significant to the least significant
-// 	for (int i = 3; i >= 0; i--) {
-
-// 		// value >> (i * 8) - bit shift to the right by i * 8 bits
-// 		// 0xFF - 8-bit mask (00000000 00000000 00000000 11111111)
-// 		// Using bitwise AND to get the last 8 bits of the shifted value
-//         char byte = (value >> (i * 8)) & 0xFF;
-
-// 		// Push the byte to the stack
-//         Stack_Push(stack, byte);
-//     }
-// }
-
-//void expr_value_push( Stack *stack, int value ) {
-//     // Break the integer value into 4 bytes and push each byte onto the stack
-//     for (int i = 3; i >= 0; i--) {
-//         char byte = (value >> (i * 8)) & 0xFF;
-//         Stack_Push(stack, byte);
-//     }
-// }
 
 /**
  * Pomocná metoda pro extrakci celočíselné hodnoty ze zásobníku.
@@ -327,46 +306,57 @@ void expr_value_pop( Stack *stack, int *value ) {
  * @return výsledek vyhodnocení daného výrazu na základě poskytnutých hodnot proměnných
  */
 
+
 bool eval( const char *infixExpression, VariableValue variableValues[], int variableValueCount, int *value ) {
-    char *postfixExpression = infix2postfix(infixExpression);
+    // Convert infix expression to postfix
+	char *postfixExpression = infix2postfix(infixExpression);
+	// If the conversion failed, return false.
     if (postfixExpression == NULL) {
-        return false;  // Conversion to postfix failed
+        return false;
     }
 
-    Stack s;
-    Stack_Init(&s);
+	// Initialize the stack for the values of variavles.
+    Stack stack;
+    Stack_Init(&stack);
 
     for (int i = 0; postfixExpression[i] != '\0'; i++) {
-        char ch = postfixExpression[i];
+        char c = postfixExpression[i];
         
-        if (ch == '=') {
-            continue;  // Ignore the '=' character
+        if (c == '=') {
+            continue;
         }
 
-        // Check if character is an operand (i.e., a variable)
-        if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9')) {
-            if (ch >= '0' && ch <= '9') {
-                expr_value_push(&s, ch - '0');
-            } else {
-                // Find the value of the variable and push onto stack
-                for (int j = 0; j < variableValueCount; j++) {
-                    if (variableValues[j].name == ch) {
-                        expr_value_push(&s, variableValues[j].value);
-                        break;
-                    }
-                }
+        // Check if character is an operand.
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+			// Find the value of the variable and push onto stack.
+			for (int j = 0; j < variableValueCount; j++) {
+				if (variableValues[j].name == c) {
+					expr_value_push(&stack, variableValues[j].value);
+					break;
+				}
+			}
+        } else if (c == '*' || c == '/' || c == '+' || c == '-') {
+
+            // Check if there is at least one operand on stack.
+			if (Stack_IsEmpty(&stack)) {
+                return false;
             }
-        }
-        // If character is an operator, pop operands, perform operation, and push result
-        else {
-            if (Stack_IsEmpty(&s)) {
-                return false;  // Not enough operands on stack
-            }
+			
             int op1, op2, result;
-            expr_value_pop(&s, &op2);
-            expr_value_pop(&s, &op1);
 
-            switch (ch) {
+			// Pop the first operand from the stack to do the operation.
+            expr_value_pop(&stack, &op2);
+
+			// Check if there is second operands on stack.
+			if (Stack_IsEmpty(&stack)) {
+                return false;
+            }
+
+			// Pop the second operand from the stack to do the operation.
+            expr_value_pop(&stack, &op1);
+			
+			// Math logic of the operation.
+            switch (c) {
                 case '+':
                     result = op1 + op2;
                     break;
@@ -387,16 +377,17 @@ bool eval( const char *infixExpression, VariableValue variableValues[], int vari
                     // Unsupported operator
                     return false;
             }
-            expr_value_push(&s, result);
+			// Push the result of the operation to the stack.
+            expr_value_push(&stack, result);
         }
     }
 
     // At the end, pop the final result
-    expr_value_pop(&s, value);
+    expr_value_pop(&stack, value);
 
     // Clean up
     free(postfixExpression);
-    Stack_Dispose(&s);
+    Stack_Dispose(&stack);
     return true;
 }
 
