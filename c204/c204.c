@@ -98,12 +98,13 @@ void doOperation( Stack *stack, char c, char *postfixExpression, unsigned *postf
 	char stackTop;
 	Stack_Top( stack, &stackTop );
 	// If the stack top is a left parenthesis, push the operator to the stack.
-	if ( stackTop == '(' ) {
-		Stack_Push( stack, c );
-		return;
-	} else if ((stackTop == '+' || stackTop == '-') && ( c == '*' || c == '/' )) {
+	if ((stackTop == '+' || stackTop == '-') && ( c == '*' || c == '/' )) {
 		// If the stack top is a math operator with lower priority, push the operator to the stack.
 		// a + b * c = a b c * + = a (b c *) +
+		Stack_Push( stack, c );
+		return;
+	} else if ( stackTop == '(' ) {
+		// If the stack top is a left parenthesis, push the operator to the stack.
 		Stack_Push( stack, c );
 		return;
 	} else {
@@ -271,14 +272,19 @@ void expr_value_push( Stack *stack, int value ) {
  *   výsledné celočíselné hodnoty z vrcholu zásobníku
  */
 void expr_value_pop( Stack *stack, int *value ) {
-
-	// *value = 0; // Initialize the value to 0 before populating with bytes
-    // for (int i = 3; i >= 0; i--) {
-    //     char byte;
-    //     Stack_Top(stack, &byte); // Get the top byte from the stack
-    //     Stack_Pop(stack); // Remove the top byte from the stack
-    //     *value |= (byte << (i * 8)); // Combine the byte into the 4-byte integer
-    // }
+	// Initialize the result variable to 0.
+	int result_var = 0; 
+    for (int i = 3; i >= 0; i--) {
+        char byte;
+		// Get the top byte from the stack and pop it to the 'byte' var.
+        Stack_Top(stack, &byte);
+        Stack_Pop(stack); 
+		// Shift the byte to the left by i * 8 bits.
+		// byte0, byte1, byte2, byte3 = xxxxxxxx, yyyyyyyy, zzzzzzzz, wwwwwwww
+		// result_var = wwwwwwww zzzzzzzz yyyyyyyy xxxxxxxx
+        result_var |= (byte << (i * 8));
+    }
+	*value = result_var;
 }
 
 
