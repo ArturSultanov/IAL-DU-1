@@ -64,21 +64,17 @@ Conversion match: OK
 [test_eval_01] Evaluate expression
 expression : (a+b)*(c-d)=
 variables  : a = 5, b = 5, c = 12, d = 2
-eval result: 1677721600
+eval result: 100
 
 
 [test_eval_02] Evaluate expression
 expression : (a-b)*C=
 variables  : a = 3, b = 5, C = -5
-Stack error: TOP
-Stack error: TOP
-Stack error: TOP
-Stack error: TOP
-eval result: 67108864
+eval result: 10
 
 
 [test_eval_03] Evaluate expression
 expression : a*b+c/d=
 variables  : a = 10, b = 3, c = 100, d = 5
-eval result: 20
+eval result: 50
 

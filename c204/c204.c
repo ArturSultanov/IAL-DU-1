@@ -243,21 +243,37 @@ char *infix2postfix( const char *infixExpression ) {
  * @param stack ukazatel na inicializovanou strukturu zásobníku
  * @param value hodnota k vložení na zásobník
  */
+
 void expr_value_push( Stack *stack, int value ) {
-
-	// value = xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx - 32-bit integer (4 bytes)
-	// Loop through the 4 bytes, from the most significant to the least significant
-	for (int i = 3; i >= 0; i--) {
-
-		// value >> (i * 8) - bit shift to the right by i * 8 bits
-		// 0xFF - 8-bit mask (00000000 00000000 00000000 11111111)
-		// Using bitwise AND to get the last 8 bits of the shifted value
+    // Push the integer value onto the stack byte by byte
+    for (int i = 0; i < 4; i++) {
         char byte = (value >> (i * 8)) & 0xFF;
-
-		// Push the byte to the stack
         Stack_Push(stack, byte);
     }
 }
+// void expr_value_push( Stack *stack, int value ) {
+
+// 	// value = xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx - 32-bit integer (4 bytes)
+// 	// Loop through the 4 bytes, from the most significant to the least significant
+// 	for (int i = 3; i >= 0; i--) {
+
+// 		// value >> (i * 8) - bit shift to the right by i * 8 bits
+// 		// 0xFF - 8-bit mask (00000000 00000000 00000000 11111111)
+// 		// Using bitwise AND to get the last 8 bits of the shifted value
+//         char byte = (value >> (i * 8)) & 0xFF;
+
+// 		// Push the byte to the stack
+//         Stack_Push(stack, byte);
+//     }
+// }
+
+//void expr_value_push( Stack *stack, int value ) {
+//     // Break the integer value into 4 bytes and push each byte onto the stack
+//     for (int i = 3; i >= 0; i--) {
+//         char byte = (value >> (i * 8)) & 0xFF;
+//         Stack_Push(stack, byte);
+//     }
+// }
 
 /**
  * Pomocná metoda pro extrakci celočíselné hodnoty ze zásobníku.
@@ -310,9 +326,78 @@ void expr_value_pop( Stack *stack, int *value ) {
  *
  * @return výsledek vyhodnocení daného výrazu na základě poskytnutých hodnot proměnných
  */
-bool eval( const char *infixExpression, VariableValue variableValues[], int variableValueCount, int *value ) {
 
-	return NULL;
+bool eval( const char *infixExpression, VariableValue variableValues[], int variableValueCount, int *value ) {
+    char *postfixExpression = infix2postfix(infixExpression);
+    if (postfixExpression == NULL) {
+        return false;  // Conversion to postfix failed
+    }
+
+    Stack s;
+    Stack_Init(&s);
+
+    for (int i = 0; postfixExpression[i] != '\0'; i++) {
+        char ch = postfixExpression[i];
+        
+        if (ch == '=') {
+            continue;  // Ignore the '=' character
+        }
+
+        // Check if character is an operand (i.e., a variable)
+        if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9')) {
+            if (ch >= '0' && ch <= '9') {
+                expr_value_push(&s, ch - '0');
+            } else {
+                // Find the value of the variable and push onto stack
+                for (int j = 0; j < variableValueCount; j++) {
+                    if (variableValues[j].name == ch) {
+                        expr_value_push(&s, variableValues[j].value);
+                        break;
+                    }
+                }
+            }
+        }
+        // If character is an operator, pop operands, perform operation, and push result
+        else {
+            if (Stack_IsEmpty(&s)) {
+                return false;  // Not enough operands on stack
+            }
+            int op1, op2, result;
+            expr_value_pop(&s, &op2);
+            expr_value_pop(&s, &op1);
+
+            switch (ch) {
+                case '+':
+                    result = op1 + op2;
+                    break;
+                case '-':
+                    result = op1 - op2;
+                    break;
+                case '*':
+                    result = op1 * op2;
+                    break;
+                case '/':
+                    if (op2 == 0) {
+                        // Division by zero error
+                        return false;
+                    }
+                    result = op1 / op2;
+                    break;
+                default:
+                    // Unsupported operator
+                    return false;
+            }
+            expr_value_push(&s, result);
+        }
+    }
+
+    // At the end, pop the final result
+    expr_value_pop(&s, value);
+
+    // Clean up
+    free(postfixExpression);
+    Stack_Dispose(&s);
+    return true;
 }
 
 /* Konec c204.c */
