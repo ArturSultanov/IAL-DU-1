@@ -35,29 +35,29 @@ int STACK_SIZE = MAX_STACK;
 bool error_flag;  
 bool solved;  
   
-/**  
- * Vytiskne upozornění, že došlo k chybě při práci se zásobníkem.  
- *  
- * TUTO FUNKCI, PROSÍME, NEUPRAVUJTE!  
- *  
- * @param error_code Interní identifikátor chyby  
- */  
-void Stack_Error( int error_code ) {  
- static const char *SERR_STRINGS[MAX_SERR + 1] = {  
-   "Unknown error",  
-   "Stack error: INIT",  
-   "Stack error: PUSH",  
-   "Stack error: TOP"  
- };  
-  
- if (error_code <= 0 || error_code > MAX_SERR)  
- {  
-  error_code = 0;  
- }  
-  
- printf("%s\n", SERR_STRINGS[error_code]);  
- error_flag = true;  
-}  
+/**
+ * Vytiskne upozornění, že došlo k chybě při práci se zásobníkem.
+ *
+ * TUTO FUNKCI, PROSÍME, NEUPRAVUJTE!
+ *
+ * @param error_code Interní identifikátor chyby
+ */
+void Stack_Error( int error_code ) {
+	static const char *SERR_STRINGS[MAX_SERR + 1] = {
+			"Unknown error",
+			"Stack error: INIT",
+			"Stack error: PUSH",
+			"Stack error: TOP"
+	};
+
+	if (error_code <= 0 || error_code > MAX_SERR)
+	{
+		error_code = 0;
+	}
+
+	printf("%s\n", SERR_STRINGS[error_code]);
+	error_flag = true;
+} 
   
 /**  
  * Provede inicializaci zásobníku - nastaví vrchol zásobníku.  
@@ -71,21 +71,21 @@ void Stack_Error( int error_code ) {
  *  
  * @param stack Ukazatel na strukturu zásobníku  
  */  
-void Stack_Init( Stack *stack ) {  
- if(stack == NULL)   
- {  
-  Stack_Error(SERR_INIT);  
-  return;  
- }  
-  
- stack->topIndex = -1; // Set the initial value of the top index  
-  
- stack->array = (char *)malloc(STACK_SIZE * sizeof(char)); // Allocates stack array  
- if(stack->array == NULL) //If allocation get wrong  
- {  
-  Stack_Error(SERR_INIT);  
-  return;  
- }  
+void Stack_Init( Stack *stack ) {
+    // Check if stack is NULL
+    if(stack == NULL) {  
+        Stack_Error(SERR_INIT);  
+        return;  
+    }  
+    // Allocate memory for stack array
+    stack->array = (char *)malloc(STACK_SIZE * sizeof(char)); // Allocates stack array  
+    // Check if allocation was successful
+    if(stack->array == NULL) {  
+        Stack_Error(SERR_INIT);  
+        return;  
+    } 
+    // Set the initial value of the top index
+    stack->topIndex = -1; 
   
 }  
   
@@ -98,8 +98,9 @@ void Stack_Init( Stack *stack ) {
  *  
  * @returns true v případě, že je zásobník prázdný, jinak false  
  */  
-bool Stack_IsEmpty(const Stack *stack) {  
-    return stack->topIndex == -1; //checking the top index, if stack is empty top index will be -1, and the result of comparison will be non-0, otherwise 1   
+bool Stack_IsEmpty(const Stack *stack) {
+    // If top index is -1 , stack is empty  
+    return stack->topIndex == -1; 
 }  
   
 /**  
@@ -115,8 +116,8 @@ bool Stack_IsEmpty(const Stack *stack) {
  * @returns true v případě, že je zásobník plný, jinak
  * false  
  */  
-bool Stack_IsFull( const Stack *stack ) {  
- return stack->topIndex == STACK_SIZE - 1; // The stack is considered full when the top index equals the maximum index - 1, because the counting of array starts from 0  
+bool Stack_IsFull( const Stack *stack ) { 
+    return stack->topIndex == STACK_SIZE - 1;  
 }  
   
 /**  
@@ -132,14 +133,13 @@ bool Stack_IsFull( const Stack *stack ) {
  * @param dataPtr Ukazatel na cílovou proměnnou  
  */  
 void Stack_Top( const Stack *stack, char *dataPtr ) {  
- if(Stack_IsEmpty(stack)) //checking if stack is empty  
- {  
-  Stack_Error(SERR_TOP);  
-  return;  
- }  
-  
- *dataPtr = stack->array[stack->topIndex]; // Saving the value of top index of the stack in dataPtr  
-  
+    if(Stack_IsEmpty(stack)) {  
+        Stack_Error(SERR_TOP);  
+        return;  
+    }  
+    // Set dataPtr to the top element of the stack
+    *dataPtr = stack->array[stack->topIndex];
+    
 }  
   
   
@@ -156,9 +156,8 @@ void Stack_Top( const Stack *stack, char *dataPtr ) {
  * @param stack Ukazatel na inicializovanou strukturu zásobníku  
  */  
 void Stack_Pop(Stack *stack) {  
-    if (!Stack_IsEmpty(stack))   
- {  
-        stack->topIndex--; // Decrease vertex index => "remove" top element  
+    if (!Stack_IsEmpty(stack)) {  
+        stack->topIndex--;
     }  
 }  
   
@@ -177,11 +176,11 @@ void Stack_Push(Stack *stack, char data) {
     if (Stack_IsFull(stack)) {  
         //if stack is full call function with error  
         Stack_Error(SERR_PUSH);  
-  return;  
+        return;  
     }  
-  
-    stack->topIndex++; // increase top index   
-    stack->array[stack->topIndex] = data; // Insert an element at the top of the stack  
+    // Because initial value is '-1', increase index before store the data
+    stack->topIndex++;   
+    stack->array[stack->topIndex] = data;  
 }  
   
   
@@ -196,10 +195,12 @@ void Stack_Dispose(Stack *stack) {
         // Release resources if they were dynamically allocated  
         if (stack->array != NULL) {  
             free(stack->array);  
-            stack->array = NULL; // Set pointer to NULL to avoid re-freeing  
+            stack->array = NULL; // Set pointer to NULL to avoid re-freeing 
         }  
           
         // Set vertex index to initial value  
         stack->topIndex = -1;  
     }  
 }
+
+/* Konec c202.c */
