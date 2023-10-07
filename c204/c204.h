@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+
 /** Využívá příklad c202 - zásobník. */
 #ifndef STUDENT_BUILD
 #include "../c202/c202.h"
