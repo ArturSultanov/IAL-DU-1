@@ -277,7 +277,6 @@ void DLL_DeleteFirst( DLList *list ) {
 			// Active element is being deleted.
 			list->activeElement = NULL;
 		}
-		///////////////////////// TO RETEST /////////////////////////
 		free(list->firstElement);
 		list->firstElement = nextElement;
 
@@ -310,7 +309,6 @@ void DLL_DeleteLast( DLList *list ) {
 			// Active element is being deleted.
 			list->activeElement = NULL;
 		}
-		///////////////////////// TO RETEST /////////////////////////
 		free(list->lastElement);
 		list->lastElement = previousElement;
 
