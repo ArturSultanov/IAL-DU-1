@@ -127,7 +127,6 @@ void DLL_Dispose( DLList *list ) {
  * @param data Hodnota k vložení na začátek seznamu
  */
 void DLL_InsertFirst( DLList *list, int data ) {
-	// KONEC SEZNAMU								  						ZACATEK SEZNAMU
 	//																			 ↓
 	// lastElement... -> nextElement -> newElement -> previousElement -> ... firstElement
 
@@ -179,7 +178,6 @@ void DLL_InsertFirst( DLList *list, int data ) {
  * @param data Hodnota k vložení na konec seznamu
  */
 void DLL_InsertLast( DLList *list, int data ) {
-	// KONEC SEZNAMU														 ZACATEK SEZNAMU
 	//		↓
 	// lastElement... -> nextElement -> newElement -> previousElement -> ... firstElement
 
@@ -336,7 +334,28 @@ void DLL_DeleteLast( DLList *list ) {
  * @param list Ukazatel na inicializovanou strukturu dvousměrně vázaného seznamu
  */
 void DLL_DeleteAfter( DLList *list ) {
-	solved = false; /* V případě řešení, smažte tento řádek! */
+	//						 			↓
+	// ... -> nextNextElement -> nextActiveElement -> activeElement -> ... 
+
+	// List is active and active element is not the last element of list.
+	if (list->activeElement != NULL && list->activeElement->nextElement != NULL) {
+
+		DLLElementPtr nextActiveElement = list->activeElement->nextElement;
+		DLLElementPtr nextNextElement = nextActiveElement->nextElement;
+
+		if (nextNextElement == NULL) {
+			// Element we want to delete is the last one.
+			// X -> activeElement -> ...
+			list->lastElement = list->activeElement;
+		} else {
+			// Element we want to delete is NOT the last one.
+			// ... -> nextNextElement -> X -> activeElement -> ...
+			nextNextElement->previousElement = list->activeElement;
+		}
+
+		list->activeElement->nextElement = nextNextElement;
+		free(nextActiveElement);
+	}
 }
 
 /**
