@@ -203,4 +203,5 @@ void Stack_Dispose(Stack *stack) {
     }  
 }
 
+// xsulta01 - Artur Sultanov
 /* Konec c202.c */
