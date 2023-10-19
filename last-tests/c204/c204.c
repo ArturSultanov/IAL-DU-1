@@ -226,8 +226,8 @@ char *infix2postfix( const char *infixExpression ) {
 
 	// Add the null terminator to the end of the postfix expression.
 	postfixExpression[postfixExpressionLength] = '\0';
-	free(stack);
 	Stack_Dispose(stack);
+	free(stack);
 
 	return postfixExpression;
 }
