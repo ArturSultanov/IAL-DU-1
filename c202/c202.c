@@ -72,7 +72,7 @@ void Stack_Error( int error_code ) {
  * @param stack Ukazatel na strukturu zásobníku  
  */  
 void Stack_Init( Stack *stack ) {
-    // Check if stack is NULL
+    // Check if stack was initialized
     if(stack == NULL) {  
         Stack_Error(SERR_INIT);  
         return;  
@@ -84,7 +84,7 @@ void Stack_Init( Stack *stack ) {
         Stack_Error(SERR_INIT);  
         return;  
     } 
-    // Set the initial value of the top index
+    // Set the initial value of the top index to -1, that means stack is empty
     stack->topIndex = -1; 
   
 }  
@@ -203,5 +203,4 @@ void Stack_Dispose(Stack *stack) {
     }  
 }
 
-// xsulta01 - Artur Sultanov
 /* Konec c202.c */
